@@ -1,0 +1,45 @@
+# Node.js dependencies
+node_modules
+package-lock.json
+
+# Build output
+build
+
+# Environment-specific configuration
+.env
+.venv
+venv
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore IDE and editor files
+.idea
+.vscode
+*.code-workspace
+.vs
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Compiled files
+*.min.js
+*.min.css
+
+# macOS-specific files
+.DS_Store
+
+# Ignore pycache directories
+__pycache__
+
+# Ignore database files
+*.db
+
+# Compiled Python files
+*.pyc
+*.pyo
