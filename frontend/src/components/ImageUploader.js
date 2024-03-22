@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
-import apiService from '../services/apiService';
+import React, { useState, useEffect } from 'react';
+import { ping } from '../services/pingService';
+import { performSegmentation } from '../services/segmentationService';
+import { calculateRepresentation } from '../services/representationService';
+
+// import { ping, performSegmentation, calculateRepresentation } from '../services/apiService';
 
 function ImageUploader() {
     const [image, setImage] = useState(null);
+
+    useEffect(() => {
+        const testConnection = async () => {
+            try {
+                const result = await ping();
+                console.log(result);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        testConnection();
+    }, []);
 
     const handleImageChange = async (event) => {
         const selectedImage = event.target.files[0];
@@ -15,14 +32,16 @@ function ImageUploader() {
           });
     
           try {
-            const response = await apiService.uploadImage(selectedImage);
-            console.log('Backend response:', response);
+            const segmentationResults = await performSegmentation(selectedImage);
+            console.log('Segmentation results:', segmentationResults);
+            const representationResults = await calculateRepresentation(selectedImage);
+            console.log('Representation results:', representationResults);
           } catch (error) {
-            console.error('Error uploading image:', error.message);
+            console.error(error);
           }
         }
-      };
-
+    };
+    
     const handleDrop = (event) => {
         event.preventDefault();
         const selectedImage = event.dataTransfer.files[0];

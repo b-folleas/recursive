@@ -1,10 +1,20 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app) # Activate CORS
 
 @app.route('/')
 def index():
     return "/home"
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    """
+    Endpoint to perform a connection test.
+    """
+    return jsonify('pong')
 
 # Endpoint for Algorithm A
 @app.route('/segmentation', methods=['POST'])
@@ -26,7 +36,7 @@ def segmentation():
     # For demonstration purposes, returning dummy data
     objects = [{'x': 100, 'y': 100}, {'x': 200, 'y': 200}] 
 
-    return jsonify({'objects': objects})
+    return jsonify(objects)
 
 # Endpoint for Algorithm B
 @app.route('/representation', methods=['POST'])
@@ -46,9 +56,9 @@ def representation():
     # Implement Algorithm B logic here
     # Perform representation calculation and return result
     # For demonstration purposes, returning dummy data
-    representation = [0.1, 0.2, ..., 0.9]
+    representation = [0.1, 0.2, 0.9]
 
-    return jsonify({'representation': representation})
+    return jsonify(representation)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
