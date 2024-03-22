@@ -1,31 +1,37 @@
 FROM python:3.9
 
-# Installation de Conda
+# Conda Installation
 RUN apt-get update && \
     apt-get install -y wget && \
+        # Download and run Miniconda installer
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -b -p /opt/conda && \
     rm /tmp/miniconda.sh && \
+        # Create symbolic link to Conda's configuration script
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+        # Add Conda initialization to bashrc
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+    echo "conda init" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
-# Mettre à jour Conda et installer les outils nécessaires
+# Conda update and other tools installation
 RUN /opt/conda/bin/conda update -n base -c defaults conda && \
     /opt/conda/bin/conda install -y numpy scikit-learn pytorch
+
+# Conda install faiss
+RUN /opt/conda/bin/conda install faiss-cpu -c pytorch
 
 # Set the PATH to include Conda
 ENV PATH="/opt/conda/bin:${PATH}"
 
-# Copier l'application Flask
+# Copy Flask app
 COPY . /app
 WORKDIR /app
 
-# Installation des dépendances Python de l'application
+# Install Flask app dependencies
 RUN pip install -r requirements.txt
 
-# Exposer le port
 EXPOSE 5000
 
-# Commande pour lancer l'application
+# Launch app
 CMD ["python", "app.py"]
