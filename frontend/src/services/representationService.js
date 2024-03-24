@@ -1,9 +1,11 @@
 import apiService from './apiConfig';
 
 // Fonction pour calculer la représentation (Algorithm B) pour un crop d'image
-export const calculateRepresentation = async (imagePath) => {
+export const calculateRepresentation = async (image) => {
     try {
-        const response = await apiService.post(`/representation`, { image_path: imagePath });
+        const formData = new FormData();
+        formData.append('image', image);
+        const response = await apiService.post(`/representation`, formData);
         return response.data;
     } catch (error) {
         console.error(error);

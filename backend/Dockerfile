@@ -1,4 +1,8 @@
-FROM python:3.9
+FROM python:3.12
+
+# System dependencies installation
+RUN apt-get update && \
+    apt-get install -y wget libsm6 libxext6 libxrender-dev
 
 # Conda Installation
 RUN apt-get update && \
@@ -14,22 +18,30 @@ RUN apt-get update && \
     echo "conda init" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
-# Conda update and other tools installation
-RUN /opt/conda/bin/conda update -n base -c defaults conda && \
-    /opt/conda/bin/conda install -y numpy scikit-learn pytorch
-
-# Conda install faiss
-RUN /opt/conda/bin/conda install faiss-cpu -c pytorch
 
 # Set the PATH to include Conda
 ENV PATH="/opt/conda/bin:${PATH}"
+
+# Conda update and other tools installation
+RUN conda update -n base -c defaults conda && \
+    conda install -y pytorch && \
+    conda install flask && \
+    conda install flask_cors && \
+    conda install scikit-image -c conda-forge
+
+# Conda install faiss
+RUN conda install faiss-cpu -c pytorch
 
 # Copy Flask app
 COPY . /app
 WORKDIR /app
 
-# Install Flask app dependencies
-RUN pip install -r requirements.txt
+# Create Conda environment and install dependencies
+# COPY environment.yml .
+# RUN conda env create -f environment.yml
+
+# Activate Conda environment
+# RUN echo "conda activate $(head -1 environment.yml | cut -d' ' -f2)" > ~/.bashrc
 
 EXPOSE 5000
 

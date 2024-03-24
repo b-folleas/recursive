@@ -1,9 +1,10 @@
 import apiService from './apiConfig';
 
-// Fonction pour effectuer la segmentation (Algorithm A) sur une image
 export const performSegmentation = async (imagePath) => {
     try {
-        const response = await apiService.post(`/segmentation`, { image_path: imagePath });
+        const formData = new FormData();
+        formData.append('image_path', imagePath);
+        const response = await apiService.post(`/segmentation`, formData);
         return response.data;
     } catch (error) {
         console.error(error);
