@@ -9,10 +9,7 @@ import { uploadImage } from '../services/uploadService';
 
 function ImageUploader() {
     const [image, setImage] = useState(null);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: ''
-    });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '' });
 
     // Test connection to backend on component load
     useEffect(() => {
@@ -29,7 +26,6 @@ function ImageUploader() {
         testConnection();
     }, []);
 
-    // Set selected image (preview)
     const setSelectedImage = async (selectedImage, imagePath = null) => {
         const imageProperties = {
             file: selectedImage,
@@ -42,7 +38,6 @@ function ImageUploader() {
         }
     };
 
-    // Set selected image (preview)
     const setImagePath = async (imagePath) => {
         image.imagePath = imagePath
     };
@@ -69,6 +64,7 @@ function ImageUploader() {
     const handleUploadClick = async () => {
         if (!image) {
             console.error('No image selected');
+            setSnackbar({ open: true, message: 'No image selected' })
             return;
         }
         console.log(image)
@@ -78,19 +74,27 @@ function ImageUploader() {
             setImagePath(result.imagePath);
             setSnackbar({ open: true, message: result.message })
         } catch (error) {
-            console.error('Error performing segmentation:', error.message);
-            setSnackbar({ open: true, message: 'Error performing segmentation' })
+            console.error('Error during upload:', error.message);
+            setSnackbar({ open: true, message: 'Error during upload' })
         }
     };
 
     const handleSegmentationClick = async () => {
         if (!image) {
             console.error('No image selected');
+            setSnackbar({ open: true, message: 'No image selected' })
             return;
         }
         try {
             const result = await performSegmentation(image.imagePath);
             console.log('Segmentation result:', result);
+            // Retrieve the img element
+            const imageElement = document.getElementById('segmentedImage');
+            // Recover image in base64
+            const base64Image = "data:image/png;base64, " + result.image;
+            console.log('base64Image', base64Image)
+            // Set image as source of img element
+            imageElement.src = base64Image;
             setSnackbar({ open: true, message: result.message })
         } catch (error) {
             console.error('Error performing segmentation:', error.message);
@@ -101,6 +105,7 @@ function ImageUploader() {
     const handleRepresentationClick = async () => {
         if (!image) {
             console.error('No image selected');
+            setSnackbar({ open: true, message: 'No image selected' })
             return;
         }
         try {
@@ -115,13 +120,20 @@ function ImageUploader() {
 
     return (
         <div>
+             <Stack spacing={2} direction="row" justifyContent="center">
+                <Button onClick={handleImportClick} color="secondary" variant="contained">Importer une image</Button>
+                <Button onClick={handleUploadClick} color="secondary" variant="contained">Uploader une image</Button>
+                <Button onClick={handleSegmentationClick} color="primary" variant="contained">Segmentation</Button>
+                <Button onClick={handleRepresentationClick} color="primary" variant="contained" disabled>Représentation</Button>
+            </Stack>
+            <br />
             <label htmlFor="import-input">
                 <div
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     style={{ border: '2px dashed #aaa', borderRadius: '5px', padding: '20px', textAlign: 'center', cursor: 'pointer', width: '800px', height: '200px', margin: 'auto' }}
                 >
-                    Glissez et déposez une image ici ou cliquez pour sélectionner un fichier
+                    Drag and drop an image here or click to select a file
                 </div>
             </label>
             <input
@@ -134,17 +146,16 @@ function ImageUploader() {
 
             {image && (
                 <div>
-                    <h2>Preview de l'image ({image.fileName})</h2>
-                    <img src={image.previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
-                </div>
+                    <div>
+                        <h2>Image preview ({image.fileName})</h2>
+                        <img src={image.previewUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                    </div>
+                    <div>
+                        <h2>Segmented image</h2>
+                        <img id="segmentedImage" src={image} alt="Segmented" style={{ maxWidth: '100%', maxHeight: '300px' }} />
+                    </div>
+            </div>
             )}
-            <br />
-            <Stack spacing={2} direction="row" justifyContent="center">
-                <Button onClick={handleImportClick} color="secondary" variant="contained">Visualiser une image</Button>
-                <Button onClick={handleUploadClick} color="secondary" variant="contained">Uploader une image</Button>
-                <Button onClick={handleSegmentationClick} color="primary" variant="contained">Segmentation</Button>
-                <Button onClick={handleRepresentationClick} color="primary" variant="contained">Représentation</Button>
-            </Stack>
             <CustomSnackbar message={snackbar.message} open={snackbar.open} />
         </div>
     );

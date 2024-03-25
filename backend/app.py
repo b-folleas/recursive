@@ -1,7 +1,8 @@
 import os
+import base64
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
 from segmentation import perform_segmentation
 
 
@@ -21,7 +22,7 @@ def ping():
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
-    global UPLOAD_FOLDER # Declare constante as global to access it in this context
+    global UPLOAD_FOLDER # Declare constant as global to access it in this context
     if 'image' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
 
@@ -30,7 +31,14 @@ def upload_image():
         return jsonify({'error': 'No file selected'}), 400
 
     filename = file.filename
-    file.save(os.path.join(UPLOAD_FOLDER, filename))
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+    # Check if the file already exists, then delete it
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    # Save the new file
+    file.save(file_path)
 
     return jsonify({'message': 'Image uploaded successfully', 'imagePath': os.path.join(UPLOAD_FOLDER, filename)})
 
@@ -53,9 +61,15 @@ def segmentation():
         return jsonify({'error': 'No image provided'}), 400
 
     # Perform segmentation using the perform_segmentation function
-    objects = perform_segmentation(image_path)
+    image_bytes, objects = perform_segmentation(image_path)
 
-    return jsonify({'message': 'Segmentation performed successfully', 'result': objects})
+    # Convert the image to base64 to include it in a JSON response
+    image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+
+    if not image_base64:
+        return jsonify({'error': 'Could not convert segmented image'}), 400
+
+    return jsonify({'message': 'Segmentation performed successfully', 'result': objects, 'image': image_base64})
 
 # Endpoint for Algorithm B
 @app.route('/representation', methods=['POST'])

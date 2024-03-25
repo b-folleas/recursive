@@ -27,21 +27,12 @@ RUN conda update -n base -c defaults conda && \
     conda install -y pytorch && \
     conda install flask && \
     conda install flask_cors && \
-    conda install scikit-image -c conda-forge
-
-# Conda install faiss
-RUN conda install faiss-cpu -c pytorch
+    conda install scikit-image -c conda-forge && \
+    conda install faiss-cpu -c pytorch
 
 # Copy Flask app
 COPY . /app
 WORKDIR /app
-
-# Create Conda environment and install dependencies
-# COPY environment.yml .
-# RUN conda env create -f environment.yml
-
-# Activate Conda environment
-# RUN echo "conda activate $(head -1 environment.yml | cut -d' ' -f2)" > ~/.bashrc
 
 EXPOSE 5000
 
